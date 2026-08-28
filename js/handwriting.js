@@ -88,11 +88,10 @@ function penFaults(strokes, fontSize) {
     const dx = p[p.length - 1][0] - p[0][0], dy = p[p.length - 1][1] - p[0][1];
     const net = Math.hypot(dx, dy);
     if (net < L * 0.55) continue;                       // منحنٍ أو مغلق
-    if (Math.abs(dy) > Math.abs(dx) * 1.6) {
-      if (dy < 0) out.push({ kind: 'up', p });
-    } else if (Math.abs(dx) > Math.abs(dy) * 1.6) {
-      if (dx > 0) out.push({ kind: 'rev', p });
-    }
+    // القائم وحده يُحاسَب عليه. وكانت هنا قاعدة «الممتدّ من اليمين لليسار»
+    // فأسقطناها: كرّاسة «خطي أجمل» تُثبت أنّ عارضة الحاء تُرسم من اليسار إلى
+    // اليمين وأنّ ذيل العين ينتهي يمينًا، فكانت تُخطِّئ المصيب.
+    if (Math.abs(dy) > Math.abs(dx) * 1.6 && dy < 0) out.push({ kind: 'up', p });
   }
   return out;
 }
@@ -224,10 +223,8 @@ export function handwritingPad(phrase, key) {
     const faults = penFaults(strokes, FONT_SIZE);
     const l2r = wroteLeftToRight(strokes, FONT_SIZE, W);
     const notes = [];
-    const up = faults.filter(f => f.kind === 'up').length;
-    const rev = faults.filter(f => f.kind === 'rev').length;
+    const up = faults.length;
     if (up) notes.push(`رسمتَ ${ar(up)} من الحروفِ القائمةِ من أسفلَ إلى أعلى. الألفُ واللامُ وعمودُ الطاءِ والكافِ تُبدأُ من أعلى وينزلُ بها القلمُ إلى السطر.`);
-    if (rev) notes.push(`رسمتَ ${ar(rev)} حركةً من اليسارِ إلى اليمين. العربيّةُ تُكتَبُ من اليمينِ إلى اليسار، والقلمُ يتبعُ ذلك.`);
     if (l2r) notes.push('سارتِ العبارةُ عندك من اليسارِ إلى اليمين. ابدأْ من أقصى اليمين.');
     if (faults.length) notes.push('الحركاتُ الحمراءُ على اللوحِ هي التي عكستَ اتّجاهَها.');
 
