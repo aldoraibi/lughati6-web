@@ -65,6 +65,21 @@ function show() {
     }, p % 60 === 0 ? `${ar(p / 60)} د` : `${ar(p)} ث`)));
     s.append(presets);
 
+    // ضبطٌ حرٌّ للدقيقة والثانية — الجاهزةُ لا تكفي المعلّمَ إن أراد ٩٠ ثانيةً مثلًا
+    const setDur = v => {
+      duration = Math.max(5, Math.min(90 * 60, v));
+      left = duration; W('dur', duration); pause(); paintTime(); paintPanel();
+    };
+    const stepper = (label, value, delta) => el('div', { style: 'display:grid;gap:2px;justify-items:center' },
+      el('div', { style: 'font-size:12px;opacity:.65' }, label),
+      el('div', { class: 'row', style: 'gap:6px' },
+        el('button', { class: 'btn ghost sm', style: 'padding:2px 9px', onclick: () => setDur(duration - delta) }, '−'),
+        el('b', { style: 'min-width:30px;font-size:17px' }, ar(value)),
+        el('button', { class: 'btn sm', style: 'padding:2px 9px', onclick: () => setDur(duration + delta) }, '+')));
+    s.append(el('div', { class: 'row', style: 'gap:16px;justify-content:center' },
+      stepper('دقيقة', Math.floor(duration / 60), 60),
+      stepper('ثانية', duration % 60, 5)));
+
     const op = el('input', { type: 'range', min: 25, max: 100, value: Math.round(opacity * 100), dir: 'ltr',
       oninput: e => { opacity = e.target.value / 100; box.style.opacity = opacity; W('op', opacity); } });
     s.append(el('div', { class: 'row', style: 'gap:8px' }, '◐', op));

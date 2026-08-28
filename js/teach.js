@@ -30,11 +30,14 @@ export function teachMode(lessonID, lessonTitle, mode) {
     clock.style.background = s > 300 ? 'rgba(217,83,79,.16)' : '';
     clock.style.color = s > 300 ? '#d9534f' : '';
   }, 1000);
-  paint();
 
   function close() { clearInterval(timer); ov.remove(); }
   const big = (txt, cls = '') => el('div', { class: cls, style: 'font-size:clamp(24px,3.4vw,42px);font-weight:600;line-height:1.7' }, rtl(txt));
   const btn = (t, fn, c = '') => el('button', { class: 'btn ' + c, style: 'font-size:20px;padding:13px 30px', onclick: fn }, t);
+
+  // النداءُ بعد تعريفِ big وbtn: كانا ثابتينِ يُستعملانِ قبلَ تهيئتِهما،
+  // فكانت التهيئةُ والقياسُ تنكسرانِ في الويبِ انكسارًا صامتًا.
+  paint();
 
   function paint() {
     clear(host);

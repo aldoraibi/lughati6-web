@@ -1,8 +1,11 @@
 // عملٌ بلا إنترنت بعد أوّل فتح
-const V = 'lughati6-v1';
+// تُرفَع هذه مع كلِّ تحديثٍ، وإلّا بقي الطالبُ على النسخةِ القديمةِ المخزَّنة
+const V = 'lughati6-v3';
 self.addEventListener('install', e => { self.skipWaiting(); });
 self.addEventListener('activate', e => e.waitUntil(
-  caches.keys().then(k => Promise.all(k.filter(x => x !== V).map(x => caches.delete(x))))));
+  caches.keys()
+    .then(k => Promise.all(k.filter(x => x !== V).map(x => caches.delete(x))))
+    .then(() => self.clients.claim())));
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   e.respondWith(

@@ -1,6 +1,7 @@
 import { el, rtl, ar, bold, fill } from './ui.js';
 import { grade } from './answer.js';
 import { C, S, skillTitle } from './store.js';
+import { handwritingPad } from './handwriting.js';
 
 /** بطاقة سؤال واحد — تقابل QuestionCard في تطبيق iPad */
 export function questionCard(q, i, lessonID) {
@@ -124,6 +125,9 @@ export function questionCard(q, i, lessonID) {
         wrap.append(el('div', { class: 'row', style: 'margin-top:8px' },
           el('span', { style: 'flex:1' }, rtl(r)), sel));
       });
+    } else if (q.handwriting) {
+      // الرسمُ الكتابيّ: القلمُ لا الكيبورد — والمهارةُ رسمُ الحرفِ لا طبعُه
+      wrap.append(handwritingPad(q.handwriting, `hand.${lessonID}.${q.id}`));
     } else {
       wrap.append(el('textarea', {
         class: 'txt', rows: 3, placeholder: 'اكتبْ هنا…', disabled: checked,

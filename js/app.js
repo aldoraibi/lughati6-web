@@ -6,6 +6,7 @@ import { teachMode } from './teach.js';
 import { traceScreen } from './trace.js';
 import { glossaryView, memorizeView, foundationsView, aboutView } from './extras.js';
 import { toggleTimer, timerVisible } from './timer.js';
+import { toggleInk, inkOn, refitInk, openBoard } from './ink.js';
 import { transferSheet, restoreFromURL } from './transfer.js';
 
 const app = document.getElementById('app');
@@ -38,6 +39,8 @@ function render() {
   const scrim = el('div', { class: 'scrim', style: 'display:none', onclick: () => side.classList.remove('open') });
   fill(app, el('div', { class: 'shell' }, main, side, scrim));
   main.prepend(topbar(side, scrim));
+  // طولُ المستندِ تغيّر، وطبقةُ الحبرِ مقيسةٌ عليه
+  requestAnimationFrame(refitInk);
 }
 
 function topbar(side, scrim) {
@@ -76,6 +79,12 @@ function buildSide(side) {
   side.append(item('ℹ️  بيانات الكتاب والحقوق', { name: 'about' }));
   side.append(el('button', { class: 'navitem', onclick: () => { toggleTimer(); render(); } },
     (timerVisible() ? '⏱  أخفِ الساعة' : '⏱  الساعة العائمة')));
+
+  // أدواتُ السبّورة: كانت مفقودةً في الويب، وهي أكثرُ ما يُستعمَل في الحصّة
+  side.append(el('div', { class: 'navsec' }, '🖊  أدوات الحصّة'));
+  side.append(el('button', { class: 'navitem', onclick: () => { toggleInk(); render(); } },
+    inkOn() ? 'أغلقِ القلم' : 'القلمُ فوق الصفحة'));
+  side.append(el('button', { class: 'navitem', onclick: openBoard }, 'السبّورةُ البيضاء'));
 
   side.append(el('div', { class: 'navsec' }, '✦  قبل أن تبدأ'));
   side.append(item('أصل الكلام — خرائط ذهنية', { name: 'foundations' }));
@@ -164,6 +173,17 @@ async function lessonView(w, id) {
   const tabs = el('div', { class: 'tabs' });
   const host = el('div');
 
+  // شريطُ أدواتِ الحصّة: كان في التطبيقِ ولم يكن في الويب، وكانت التهيئةُ
+  // والقياسُ مدفونينِ في القسمِ الأوّلِ وحدَه فلا يكادُ يجدُهما المعلّم.
+  const tools = el('div', { class: 'row', style: 'gap:8px;flex-wrap:wrap;margin:10px 0 4px' },
+    C.teach?.lessons?.[id] ? el('button', { class: 'btn sm warm',
+      onclick: () => teachMode(id, L.title, 'warmup') }, '✦  التهيئة') : null,
+    C.teach?.lessons?.[id] ? el('button', { class: 'btn sm accent',
+      onclick: () => teachMode(id, L.title, 'assess') }, '✔︎  القياس الجماعي') : null,
+    el('button', { class: 'btn sm ghost', onclick: () => { toggleInk(); render(); } },
+      inkOn() ? '✍️  أغلقِ القلم' : '✍️  اكتبْ على الصفحة'),
+    el('button', { class: 'btn sm ghost', onclick: openBoard }, '⬜  السبّورة'));
+
   const paint = () => {
     clear(tabs); clear(host);
     L.sections.forEach((s, n) => tabs.append(el('button', {
@@ -179,11 +199,7 @@ async function lessonView(w, id) {
         L.objectives?.length ? el('div', {},
           el('b', {}, 'أهداف الدرس'),
           el('ul', {}, ...L.objectives.map(o => el('li', {}, rtl(o))))) : null,
-        el('div', { class: 'row', style: 'margin-top:10px' },
-          C.teach?.lessons?.[id] ? el('button', { class: 'btn sm warm',
-            onclick: () => teachMode(id, L.title, 'warmup') }, '✦  التهيئة') : null,
-          C.teach?.lessons?.[id] ? el('button', { class: 'btn sm accent',
-            onclick: () => teachMode(id, L.title, 'assess') }, '✔︎  القياس') : null)));
+        null));
     }
 
     const s = L.sections[si];
@@ -202,7 +218,8 @@ async function lessonView(w, id) {
   };
 
   paint();
-  w.append(tabs, host);
+  w.append(tabs, tools, host);
+  refitInk();
 }
 
 const memoBadge = (lid, bid) =>
