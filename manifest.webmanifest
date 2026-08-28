@@ -1,0 +1,11 @@
+{
+  "name": "لغتي الجميلة — نسخة تفاعلية",
+  "short_name": "لغتي",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f2f4f7",
+  "theme_color": "#2a8cb8",
+  "icons": [{ "src": "icon.png", "sizes": "1024x1024", "type": "image/png", "purpose": "any maskable" }]
+}

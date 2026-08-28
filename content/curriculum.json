@@ -1,0 +1,144 @@
+{
+  "title": "لغتي الجميلة",
+  "grade": "الصف السادس الابتدائي",
+  "term": "الفصل الدراسي الأول",
+  "units": [
+    {
+      "id": "u1",
+      "number": 1,
+      "title": "قدوات ومثل عليا",
+      "components": [
+        {
+          "id": "c-tahyiaa",
+          "title": "التهيئة",
+          "icon": "sparkles",
+          "lessons": [
+            { "id": "l-muraja3a", "title": "مراجعة المكتسبات السابقة", "file": "l-muraja3a", "bookPages": [11, 21], "ready": true },
+            { "id": "l-tashkhisi", "title": "الاختبار التشخيصي", "file": "l-tashkhisi", "bookPages": [22, 25], "ready": true }
+          ]
+        },
+        {
+          "id": "c-madkhal",
+          "title": "المدخل",
+          "icon": "door.left.hand.open",
+          "lessons": [
+            { "id": "l-anshita", "title": "مدخل الوحدة: قدوات ومثل عليا", "file": "l-anshita", "bookPages": [26, 34], "ready": true }
+          ]
+        },
+        {
+          "id": "c-mashroo3",
+          "title": "المشروع",
+          "icon": "hammer",
+          "lessons": [
+            { "id": "l-ta3rif-mashroo3", "title": "مشروع الوحدة", "file": "l-ta3rif-mashroo3", "bookPages": [35], "ready": true }
+          ]
+        },
+        {
+          "id": "c-istima3",
+          "title": "نص الاستماع",
+          "icon": "ear",
+          "lessons": [
+            { "id": "l-sayyida", "title": "سيّدة نساء أهل الجنّة", "file": "l-sayyida", "bookPages": [36, 40], "ready": true }
+          ]
+        },
+        {
+          "id": "c-fahm",
+          "title": "نص الفهم القرائي",
+          "icon": "book.pages",
+          "lessons": [
+            { "id": "l-abubakr", "title": "أبو بكر الصديق رضي الله عنه", "file": "l-abubakr", "bookPages": [41, 48], "ready": true }
+          ]
+        },
+        {
+          "id": "c-istratijiya",
+          "title": "الإستراتيجية القرائية",
+          "icon": "magnifyingglass",
+          "lessons": [
+            { "id": "l-tasaffuh", "title": "تصفّح كتاب أو مجلة أو عبر الشبكة العنكبوتية", "file": "l-tasaffuh", "bookPages": [54, 59], "ready": true },
+            { "id": "l-tamshit", "title": "قراءة التمشيط", "file": "l-tamshit", "bookPages": [60, 64], "ready": true }
+          ]
+        },
+        {
+          "id": "c-imla",
+          "title": "الظاهرة الإملائية",
+          "icon": "pencil.line",
+          "lessons": [
+            { "id": "l-hamzatan-wasl-qat3", "title": "همزتا الوصل والقطع وهمزتا (ابن - ابنة)", "file": "l-hamzatan-wasl-qat3", "bookPages": [65, 72], "ready": true },
+            { "id": "l-hamza-mutawassita", "title": "الهمزة المتوسطة", "file": "l-hamza-mutawassita", "bookPages": [73, 77], "ready": true },
+            { "id": "l-hamza-mutatarrifa", "title": "الهمزة المتطرفة", "file": "l-hamza-mutatarrifa", "bookPages": [78, 84], "ready": true }
+          ]
+        },
+        {
+          "id": "c-nahw",
+          "title": "الوظيفة النحوية",
+          "icon": "text.book.closed",
+          "lessons": [
+            { "id": "l-af3al-nasikha", "title": "الأفعال الناسخة (كان وأخواتها)", "file": "l-af3al-nasikha", "bookPages": [85, 90], "ready": true },
+            { "id": "l-huruf-nasikha", "title": "الحروف الناسخة (إنّ وأخواتها)", "file": "l-huruf-nasikha", "bookPages": [91, 98], "ready": true }
+          ]
+        },
+        {
+          "id": "c-sinf",
+          "title": "الصنف اللغوي",
+          "icon": "textformat.abc",
+          "lessons": [
+            { "id": "l-ism-fa3il-maf3ul", "title": "المشتقات: اسم الفاعل واسم المفعول من الفعل الثلاثي", "file": "l-ism-fa3il-maf3ul", "bookPages": [99, 104], "ready": true },
+            { "id": "l-ism-ala", "title": "المشتقات: اسم الآلة", "file": "l-ism-ala", "bookPages": [105, 108], "ready": true }
+          ]
+        },
+        {
+          "id": "c-rasm",
+          "title": "الرسم الكتابي",
+          "icon": "signature",
+          "lessons": [
+            { "id": "l-khat-naskh", "title": "كتابة عبارات بخط النسخ", "file": "l-khat-naskh", "bookPages": [109, 115], "ready": true }
+          ]
+        },
+        {
+          "id": "c-shi3ri",
+          "title": "النص الشعري",
+          "icon": "quote.opening",
+          "lessons": [
+            { "id": "l-omar-kisra", "title": "عمر بن الخطاب رضي الله عنه ورسول كسرى", "file": "l-omar-kisra", "bookPages": [116, 121], "ready": true }
+          ]
+        },
+        {
+          "id": "c-binyat-nass",
+          "title": "بنية النص",
+          "icon": "square.stack.3d.up",
+          "lessons": [
+            { "id": "l-wasf-shakhsiya", "title": "وصف شخصية", "file": "l-wasf-shakhsiya", "bookPages": [122, 128], "ready": true },
+            { "id": "l-talkhis", "title": "التلخيص", "file": "l-talkhis", "bookPages": [129, 136], "ready": true }
+          ]
+        },
+        {
+          "id": "c-tawasul-kitabi",
+          "title": "التواصل الكتابي",
+          "icon": "square.and.pencil",
+          "lessons": [
+            { "id": "l-kitabat-wasf", "title": "وصف شخصية", "file": "l-kitabat-wasf", "bookPages": [137, 142], "ready": true },
+            { "id": "l-kitabat-talkhis", "title": "كتابة التلخيص", "file": "l-kitabat-talkhis", "bookPages": [143, 149], "ready": true }
+          ]
+        },
+        {
+          "id": "c-tawasul-shafahi",
+          "title": "التواصل الشفهي",
+          "icon": "bubble.left.and.bubble.right",
+          "lessons": [
+            { "id": "l-3ard-sira", "title": "عرض شفهي لسيرة غيرية", "file": "l-3ard-sira", "bookPages": [150, 151], "ready": true },
+            { "id": "l-3ard-kitab", "title": "تقديم عرض شفهي عن كتاب أو قصة", "file": "l-3ard-kitab", "bookPages": [152, 153], "ready": true },
+            { "id": "l-muqabala", "title": "إجراء مقابلة شفهية", "file": "l-muqabala", "bookPages": [154, 155], "ready": true }
+          ]
+        },
+        {
+          "id": "c-ikhtibar",
+          "title": "اختبار الوحدة",
+          "icon": "checkmark.seal",
+          "lessons": [
+            { "id": "l-ikhtibar-wihda", "title": "اختبار الوحدة الأولى", "file": "l-ikhtibar-wihda", "bookPages": [156, 160], "ready": true }
+          ]
+        }
+      ]
+    }
+  ]
+}
