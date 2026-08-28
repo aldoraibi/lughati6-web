@@ -24,6 +24,9 @@ let route = { name: 'home' };
 })();
 
 export function go(r) { route = r; render(); window.scrollTo(0, 0); }
+
+// لوحُ العبارةِ يطلبُ تدريبَ حرفٍ بعينِه — بحدثٍ لا باستيرادٍ متبادل
+window.addEventListener('lg6:trace', e => go({ name: 'trace', char: e.detail?.char }));
 window.addEventListener('hashchange', () => {
   const h = location.hash.slice(1);
   if (h) go({ name: 'lesson', id: h });
@@ -107,7 +110,7 @@ function buildMain(main) {
   else if (R.name === 'memorize') memorizeView(w);
   else if (R.name === 'foundations') foundationsView(w, go);
   else if (R.name === 'about') aboutView(w);
-  else if (R.name === 'trace') traceScreen(w);
+  else if (R.name === 'trace') traceScreen(w, R.char);
   else if (R.name === 'lesson') lessonView(w, R.id);
 }
 

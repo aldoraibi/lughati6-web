@@ -1,5 +1,5 @@
 import { el, rtl, ar } from './ui.js';
-import { S } from './store.js';
+import { C, S } from './store.js';
 
 // ===== لوحُ كتابةِ العبارةِ بالقلم (نظيرُ HandwritingPadView في التطبيق) =====
 // يُبدِل صندوقَ الكتابةِ بالكيبورد في أسئلةِ الرسمِ الكتابيّ. والمقياسُ نفسُه:
@@ -64,6 +64,46 @@ function dilate(src, w, h, r) {
   return out;
 }
 
+// ===== اتّجاه القلم =====
+// كان التقويم يقيس موضع الحبر ولا يقيس حركة القلم؛ فمن رسم الألف من أسفل إلى
+// أعلى وقع حبره في موضع الألف تمامًا فحُكم له بالصواب، وهو خطأ محض في الخطّ.
+// والصورةُ لا تحمل ترتيبًا يُعرَف منه رسمُ كلّ حرف، لكنّ في العربيّة قواعد
+// لا تتخلّف: القائم يُبدأ من أعلى وينزل، والحركة الممتدّة من اليمين إلى اليسار.
+// ونستثني القصير (النقط والحركات) والمنحني المغلق (كعين الصاد) فلا حكم عليهما.
+
+const pathLen = p => {
+  let t = 0;
+  for (let i = 1; i < p.length; i++) t += Math.hypot(p[i][0] - p[i - 1][0], p[i][1] - p[i - 1][1]);
+  return t;
+};
+
+function penFaults(strokes, fontSize) {
+  const out = [];
+  const min = fontSize * 0.45;
+  for (const s of strokes) {
+    const p = s.p;
+    if (!p || p.length < 3) continue;
+    const L = pathLen(p);
+    if (L < min) continue;
+    const dx = p[p.length - 1][0] - p[0][0], dy = p[p.length - 1][1] - p[0][1];
+    const net = Math.hypot(dx, dy);
+    if (net < L * 0.55) continue;                       // منحنٍ أو مغلق
+    if (Math.abs(dy) > Math.abs(dx) * 1.6) {
+      if (dy < 0) out.push({ kind: 'up', p });
+    } else if (Math.abs(dx) > Math.abs(dy) * 1.6) {
+      if (dx > 0) out.push({ kind: 'rev', p });
+    }
+  }
+  return out;
+}
+
+function wroteLeftToRight(strokes, fontSize, width) {
+  const long = strokes.filter(s => s.p && pathLen(s.p) >= fontSize * 0.45);
+  if (long.length < 3 || !width) return false;
+  const a = long[0].p[0], b = long[long.length - 1].p[long[long.length - 1].p.length - 1];
+  return (b[0] - a[0]) > width * 0.25;
+}
+
 const count = a => a.reduce((n, v) => n + v, 0);
 const both = (a, b) => { let n = 0; for (let i = 0; i < a.length; i++) if (a[i] && b[i]) n++; return n; };
 
@@ -85,7 +125,7 @@ export function handwritingPad(phrase, key) {
 
   const out = el('div');
   let strokes = S.get(key, []) || [];
-  let cur = null, pen = 6, showGhost = true;
+  let cur = null, pen = 6, showGhost = true, faultPaths = [];
   let W = 0, H = 0, dpr = 1;
 
   function size() {
@@ -119,6 +159,16 @@ export function handwritingPad(phrase, key) {
       if (s.p.length === 1) c.lineTo(s.p[0][0] + 0.1, s.p[0][1]);
       c.stroke();
     });
+
+    // الحركاتُ المعكوسةُ بالأحمر مع نقطةٍ عند مبدئها: الرقمُ وحدَه لا يُعلِّم،
+    // والطالبُ يحتاج أن يرى من أين بدأ وإلى أين ذهب.
+    c.strokeStyle = '#d9534f'; c.fillStyle = '#d9534f'; c.lineWidth = 3;
+    faultPaths.forEach(f => {
+      c.beginPath();
+      f.p.forEach((q, i) => i ? c.lineTo(q[0], q[1]) : c.moveTo(q[0], q[1]));
+      c.stroke();
+      c.beginPath(); c.arc(f.p[0][0], f.p[0][1], 5, 0, 7); c.fill();
+    });
   }
 
   const at = e => {
@@ -127,6 +177,8 @@ export function handwritingPad(phrase, key) {
   };
   ink.addEventListener('pointerdown', e => {
     ink.setPointerCapture(e.pointerId);
+    // متى عاد يكتب سقط الحكمُ السابقُ ومعه الحركاتُ الحمراء
+    if (faultPaths.length) { faultPaths = []; out.replaceChildren(); }
     cur = { w: pen, p: [at(e)] }; strokes.push(cur); paintInk();
   });
   ink.addEventListener('pointermove', e => { if (cur) { cur.p.push(at(e)); paintInk(); } });
@@ -169,13 +221,23 @@ export function handwritingPad(phrase, key) {
     const tol = Math.max(3, Math.round(FONT_SIZE * s * 0.22));
     const coverage = both(model, dilate(stud, gw, gh, tol)) / mi;
     const accuracy = both(stud, dilate(model, gw, gh, tol)) / si;
+    const faults = penFaults(strokes, FONT_SIZE);
+    const l2r = wroteLeftToRight(strokes, FONT_SIZE, W);
     const notes = [];
+    const up = faults.filter(f => f.kind === 'up').length;
+    const rev = faults.filter(f => f.kind === 'rev').length;
+    if (up) notes.push(`رسمتَ ${ar(up)} من الحروفِ القائمةِ من أسفلَ إلى أعلى. الألفُ واللامُ وعمودُ الطاءِ والكافِ تُبدأُ من أعلى وينزلُ بها القلمُ إلى السطر.`);
+    if (rev) notes.push(`رسمتَ ${ar(rev)} حركةً من اليسارِ إلى اليمين. العربيّةُ تُكتَبُ من اليمينِ إلى اليسار، والقلمُ يتبعُ ذلك.`);
+    if (l2r) notes.push('سارتِ العبارةُ عندك من اليسارِ إلى اليمين. ابدأْ من أقصى اليمين.');
+    if (faults.length) notes.push('الحركاتُ الحمراءُ على اللوحِ هي التي عكستَ اتّجاهَها.');
+
     if (coverage < 0.75) notes.push('بقيتْ حروفٌ من النموذجِ لم تمرَّ عليها: أتمِمِ العبارةَ كلَّها.');
     if (accuracy < 0.70) notes.push('خرجَ قلمُك عن موضعِ الحرفِ كثيرًا: اجعلِ الحرفَ على النموذجِ لا بجانبِه.');
     if (si > mi * 2.2) notes.push('حروفُك أعرضُ من النموذج: اخترْ قلمًا أدقَّ.');
-    if (coverage >= 0.75 && accuracy >= 0.70)
-      notes.push('رسمُ الحروفِ ومواضعُها سليمة. يبقى الجمالُ واستواءُ السطرِ يُقوِّمُهما معلّمُك.');
-    return { coverage, accuracy, notes };
+    if (coverage >= 0.75 && accuracy >= 0.70 && !faults.length && !l2r)
+      notes.push('رسمُ الحروفِ ومواضعُها واتّجاهُ قلمِك سليم. يبقى الجمالُ واستواءُ السطرِ يُقوِّمُهما معلّمُك.');
+
+    return { coverage, accuracy, notes, faults, wrongDir: faults.length > 0 || l2r };
   }
 
   function report() {
@@ -183,9 +245,15 @@ export function handwritingPad(phrase, key) {
     out.replaceChildren();
     if (!r) return;
     if (r.empty) { out.append(el('div', { class: 'box key' }, 'لم أجدْ كتابةً بالقلمِ بعدُ.')); return; }
-    const p = Math.round((r.coverage * 0.55 + r.accuracy * 0.45) * 100);
-    const verdict = p >= 82 ? '✅ خطٌّ متقن' : p >= 62 ? '👍 قريبٌ — أعِدْ ما خرجَ عن الحرف' : '↻ أعِدِ الكتابةَ متتبِّعًا النموذج';
-    out.append(el('div', { class: 'box ' + (p >= 62 ? 'model' : 'key') },
+    // خطأُ الاتّجاه لا يُجبَرُ بالتغطية: من رسم الألفَ صاعدًا فقد أخطأ الحرفَ
+    // كلَّه وإن وقع حبرُه في موضعِه. فيُحسَمُ الحكمُ ولا يُرفَعُ فوق الخمسين.
+    const base = Math.round((r.coverage * 0.55 + r.accuracy * 0.45) * 100);
+    const p = r.wrongDir ? Math.min(base, 50) : base;
+    faultPaths = r.faults || [];
+    paintInk();
+    const verdict = r.wrongDir ? '⚠︎ اتّجاهُ القلمِ خطأ'
+      : p >= 82 ? '✅ خطٌّ متقن' : p >= 62 ? '👍 قريبٌ — أعِدْ ما خرجَ عن الحرف' : '↻ أعِدِ الكتابةَ متتبِّعًا النموذج';
+    out.append(el('div', { class: 'box ' + (!r.wrongDir && p >= 62 ? 'model' : 'key') },
       el('b', {}, `${verdict}  —  ${ar(p)}٪`),
       el('div', { style: 'margin-top:6px;font-size:15px' },
         `إتمامُ الحروف: ${ar(Math.round(r.coverage * 100))}٪  ·  البقاءُ داخلَ الحرف: ${ar(Math.round(r.accuracy * 100))}٪`),
@@ -206,7 +274,24 @@ export function handwritingPad(phrase, key) {
       class: 'btn sm ghost', style: 'padding:4px 10px', onclick: () => { pen = w; }
     }, '● ' + ar(w))));
 
-  wrap.append(tools, out);
+  // ===== تدريبُ حروفِ العبارة =====
+  // في الحرفِ المفردِ عندنا مسارُ القلمِ نقطةً نقطة، فنعرفُ مبدأَه واتّجاهَه على
+  // التحقيق. فمن أخطأ الاتّجاهَ في العبارةِ رددناه إلى حروفِها ثمّ يعود.
+  const drill = el('div', { class: 'box', style: 'margin-top:10px' });
+  const chars = [...new Set(phrase.split(''))];
+  const drillLetters = (C.letters?.letters || []).filter(L => chars.includes(L.char));
+  if (drillLetters.length) {
+    drill.append(el('b', {}, '✍️ تدرَّبْ على مبدإِ حروفِ العبارةِ واتّجاهِها:'));
+    const row = el('div', { class: 'row', style: 'gap:6px;flex-wrap:wrap;margin-top:8px' });
+    drillLetters.forEach(L => row.append(el('button', {
+      class: 'btn ghost sm', style: 'font-size:22px;padding:4px 12px', title: L.name,
+      onclick: () => window.dispatchEvent(new CustomEvent('lg6:trace', { detail: { char: L.char } }))
+    }, L.char)));
+    drill.append(row);
+    wrap.append(tools, out, drill);
+  } else {
+    wrap.append(tools, out);
+  }
   requestAnimationFrame(size);
   window.addEventListener('resize', () => requestAnimationFrame(size));
   return wrap;

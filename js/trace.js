@@ -2,7 +2,7 @@ import { el, rtl, ar, clear, credit } from './ui.js';
 import { C, S } from './store.js';
 
 /** تدريب الخطّ: الحرف الباهت من خطّ الجهاز، والتقويم على صورته الحقيقيّة */
-export function traceScreen(w) {
+export function traceScreen(w, autoChar) {
   const set = C.letters;
   if (!set) { w.append(el('div', { class: 'card' }, 'تعذّر تحميل حروف الخط')); return; }
   const best = S.get('trace', {});
@@ -25,6 +25,12 @@ export function traceScreen(w) {
         sc ? ar(sc) + '٪' : ' ')));
   });
   w.append(grid, credit());
+
+  // قادمًا من لوح العبارة: يُفتَحُ الحرفُ المطلوبُ رأسًا
+  if (autoChar) {
+    const L = set.letters.find(l => l.char === autoChar);
+    if (L) requestAnimationFrame(() => open(L));
+  }
 
   function open(L) {
     const S1 = Math.min(380, window.innerWidth - 60);
