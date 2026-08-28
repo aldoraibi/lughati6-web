@@ -1,4 +1,4 @@
-import { el, rtl, ar, bold, credit, rightsBar } from './ui.js';
+import { el, rtl, ar, bold, credit, rightsBar, fill } from './ui.js';
 import { C, S } from './store.js';
 
 // ===== المعجم =====
@@ -22,7 +22,7 @@ export function glossaryView(w) {
 
   const norm = s => (s || '').replace(/[ً-ْـ]/g, '').replace(/[أإآٱ]/g, 'ا').replace(/^ال/, '');
   function paint(q = '') {
-    host.replaceChildren();
+    fill(host, );
     (g.letters || []).forEach(L => {
       const hits = (L.entries || []).filter(e => !q || norm(e.word).includes(norm(q)));
       if (!hits.length) return;
@@ -65,7 +65,7 @@ export function memorizeView(w) {
 
     const lines = () => it.lines || [];
     const paint = () => {
-      host.replaceChildren(
+      fill(host, 
         el('div', { class: 'row', style: 'justify-content:space-between' },
           el('h3', { style: 'margin:0' }, rtl(it.title)),
           el('button', { class: 'btn ghost sm', onclick: () => ov.remove() }, '✕')),

@@ -1,4 +1,4 @@
-import { el, rtl, ar, bold } from './ui.js';
+import { el, rtl, ar, bold, fill } from './ui.js';
 import { grade } from './answer.js';
 import { C, S, skillTitle } from './store.js';
 
@@ -13,7 +13,7 @@ export function questionCard(q, i, lessonID) {
   const body = el('div');
 
   const draw = () => {
-    body.replaceChildren();
+    fill(body, );
 
     if (q.context) body.append(el('div', { class: 'muted', style: 'font-size:15px;margin-bottom:6px' }, rtl(q.context)));
 

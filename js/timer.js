@@ -1,4 +1,4 @@
-import { el, ar } from './ui.js';
+import { el, ar, fill } from './ui.js';
 
 /** ساعةٌ عائمةٌ فوق الصفحة: تُسحب، وتُضبط شفافيّتُها ومدّتُها، ولها نغمةُ نهاية */
 let box = null;
@@ -47,7 +47,7 @@ function show() {
 
   let showSet = false;
   function paintPanel() {
-    panel.replaceChildren(
+    fill(panel, 
       el('div', { class: 'row', style: 'justify-content:center;gap:9px;margin-top:12px' },
         rnd(running ? '❚❚' : '▶', () => running ? pause() : start(), true),
         rnd('↺', () => { pause(); left = duration; paintTime(); }),

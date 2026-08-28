@@ -21,6 +21,12 @@ export const rtl = s => '‏' + (s ?? '');
 /** يحوّل **نص** إلى عريض */
 export const bold = s => rtl(s ?? '').replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
 
+/** بديلٌ آمنٌ لـ replaceChildren: يتجاهل null بدل أن يكتبها نصًّا */
+export const fill = (node, ...kids) => {
+  node.replaceChildren(...kids.flat().filter(k => k != null));
+  return node;
+};
+
 export const clear = n => { while (n.firstChild) n.removeChild(n.firstChild); return n; };
 
 export function credit() {

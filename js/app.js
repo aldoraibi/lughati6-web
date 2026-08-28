@@ -1,4 +1,4 @@
-import { el, rtl, ar, clear, credit, rightsBar } from './ui.js';
+import { el, rtl, ar, clear, credit, rightsBar, fill } from './ui.js';
 import { C, S, loadContent, lesson, allRefs, lessonRef, Profiles } from './store.js';
 import { block } from './blocks.js';
 import { questionCard } from './question.js';
@@ -6,6 +6,7 @@ import { teachMode } from './teach.js';
 import { traceScreen } from './trace.js';
 import { glossaryView, memorizeView, foundationsView, aboutView } from './extras.js';
 import { toggleTimer, timerVisible } from './timer.js';
+import { transferSheet, restoreFromURL } from './transfer.js';
 
 const app = document.getElementById('app');
 let route = { name: 'home' };
@@ -13,10 +14,12 @@ let route = { name: 'home' };
 // ===== الإقلاع =====
 (async function boot() {
   try { await loadContent(); } catch (e) {
-    app.replaceChildren(el('div', { class: 'boot' }, 'تعذّر تحميل المحتوى: ' + e.message)); return;
+    fill(app, el('div', { class: 'boot' }, 'تعذّر تحميل المحتوى: ' + e.message)); return;
   }
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+  const back = await restoreFromURL();
   render();
+  if (back && !back.error) welcome(back);
 })();
 
 export function go(r) { route = r; render(); window.scrollTo(0, 0); }
@@ -27,13 +30,13 @@ window.addEventListener('hashchange', () => {
 
 // ===== الرسم =====
 function render() {
-  if (!Profiles.active()) return app.replaceChildren(gate());
+  if (!Profiles.active()) return fill(app, gate());
   const side = el('aside', { class: 'side' });
   const main = el('main', { class: 'main' });
   buildSide(side);
   buildMain(main);
   const scrim = el('div', { class: 'scrim', style: 'display:none', onclick: () => side.classList.remove('open') });
-  app.replaceChildren(el('div', { class: 'shell' }, main, side, scrim));
+  fill(app, el('div', { class: 'shell' }, main, side, scrim));
   main.prepend(topbar(side, scrim));
 }
 
@@ -127,7 +130,8 @@ function homeView(w) {
       stat(ar(answered), 'سؤالًا أجبتَ عنه'),
       stat(answered ? ar(Math.round(right / answered * 100)) + '٪' : '—', 'نسبة الصواب')),
     el('div', { style: 'margin-top:12px' },
-      el('button', { class: 'btn sm ghost', onclick: transferBox }, '⇄  نقلُ تقدُّمي إلى جهازٍ آخر'))));
+      el('button', { class: 'btn sm ghost', onclick: () => transferSheet(modal, closeModal, render) },
+        '📱  أُكمِلُ على جهازٍ آخر'))));
 
   w.append(rightsBar());
   w.append(credit());
@@ -137,24 +141,13 @@ const stat = (n, label) => el('div', {},
   el('div', { style: 'font-size:26px;font-weight:700;color:var(--primary)' }, n),
   el('div', { class: 'muted', style: 'font-size:13px' }, label));
 
-// ===== نقل التقدّم بين الأجهزة =====
-function transferBox() {
-  const code = Profiles.export(Profiles.activeId());
-  const ta = el('textarea', { class: 'txt', rows: 4, readonly: true }, code);
-  const inp = el('textarea', { class: 'txt', rows: 3, placeholder: 'ألصقِ الرمزَ هنا…' });
-  modal('نقلُ التقدّم بين الأجهزة',
-    el('div', {},
-      el('p', {}, rtl('احفظْ هذا الرمزَ وأرسلْه إلى نفسك. في الجهاز الجديد افتحِ الموقعَ ثم ألصقْه في الأسفل.')),
-      ta,
-      el('div', { class: 'row', style: 'margin-top:8px' },
-        el('button', { class: 'btn sm', onclick: () => { ta.select(); document.execCommand('copy'); } }, 'انسخْ الرمز')),
-      el('hr', { style: 'margin:18px 0;border:0;border-top:1px solid var(--line)' }),
-      el('b', {}, 'استعادةٌ في جهازٍ جديد'), inp,
-      el('div', { class: 'row', style: 'margin-top:8px' },
-        el('button', { class: 'btn accent sm', onclick: () => {
-          try { Profiles.import(inp.value); closeModal(); render(); }
-          catch { alert('الرمز غير صحيح'); }
-        } }, 'استعِدْ تقدُّمي'))));
+function welcome(p) {
+  const t = el('div', {
+    style: `position:fixed;inset-inline:0;top:14px;z-index:200;display:flex;justify-content:center`
+  }, el('div', { class: 'card', style: 'padding:12px 20px;box-shadow:0 8px 24px rgba(0,0,0,.2)' },
+    `أهلًا ${p.name} — عادَ تقدُّمُك كاملًا 🎉`));
+  document.body.append(t);
+  setTimeout(() => t.remove(), 4200);
 }
 
 // ===== شاشة الدرس =====
@@ -246,7 +239,7 @@ function gate() {
     el('button', { class: 'btn ghost', style: 'margin-inline-start:8px', onclick: restore }, '⇄  استعادةٌ برمز')));
 
   w.append(el('div', { class: 'box', style: 'background:color-mix(in srgb,var(--accent) 9%,transparent);margin-top:16px;font-size:14px' },
-    rtl('🔒 الحسابُ محفوظٌ في متصفّحِ هذا الجهازِ وحدَه: لا بريدَ ولا كلمةَ مرورٍ ولا تسجيلَ دخول، ولا يُرسَلُ شيءٌ إلى أيِّ جهة.')));
+    rtl('🔒 الحسابُ محفوظٌ في هذا الجهازِ وحدَه — لا بريدَ ولا كلمةَ مرور. وإن غيّرتَ جهازَك فافتحْ «أُكمِلُ على جهازٍ آخر» من الرئيسةِ في جهازِك القديم.')));
   w.append(rightsBar());
   w.append(credit());
   return w;
