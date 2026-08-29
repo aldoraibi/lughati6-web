@@ -275,6 +275,11 @@ export function traceScreen(w, autoChar) {
       verdict = v;
       record(v.score);
       show();
+      // متى أتمَّ الطالبُ بدنَ الحرفِ صحيحًا ظهرتْ نقطتُه من نفسِها
+      const pass = v.start && v.dir && v.score >= 70;
+      if (pass && step + 1 < nStep && step + 1 >= nStroke) {
+        setTimeout(() => { if (verdict) nextStep(); }, 900);
+      }
     }
 
     const line = (ok, y, n) => el('div', { class: 'row', style: 'gap:8px' },
