@@ -70,11 +70,19 @@ export function teachMode(lessonID, lessonTitle, mode) {
   }
 
   function items() {
-    const list = mode === 'warmup' ? plan.warmup.items : plan.group.items;
+    const list = mode === 'warmup' ? (plan.warmup.items || []) : plan.group.items;
+
+    // مشهدُ التهيئة: قصّةٌ تُقرَأ ثمّ سؤالٌ لا يُجاب — جوابُه في الدرس.
+    // والغرضُ أن يدخلَ الطالبُ إلى الدرسِ وفي رأسِه سؤال، لا أن يُختبَرَ قبلَه.
+    if (mode === 'warmup' && !list.length) return scene();
+
     const it = list[Math.min(step, list.length - 1)];
     host.append(el('div', { class: 'muted' }, `${ar(step + 1)} / ${ar(list.length)}`));
 
     if (mode === 'warmup') {
+      if (plan.warmup.text) host.append(el('div', {
+        class: 'card', style: 'font-size:clamp(16px,1.9vw,21px);line-height:2;text-align:start;max-height:34vh;overflow:auto'
+      }, rtl(plan.warmup.text)));
       host.append(el('div', { class: 'card' }, big(it.q)));
       if (shown) host.append(el('div', { class: 'card', style: 'background:color-mix(in srgb,var(--accent) 13%,transparent)' },
         big(typeof it.a === 'number' ? `الإجابة: ارفعْ ${ar(it.a)}` : it.a)));
@@ -92,6 +100,26 @@ export function teachMode(lessonID, lessonTitle, mode) {
       !shown ? btn('أظهرِ الإجابة', () => { shown = true; paint(); })
         : step < list.length - 1 ? btn('التالي  ‹', () => { step++; shown = false; paint(); })
         : btn('إنهاء', () => { stage = mode === 'warmup' ? 'report' : 'exit'; paint(); }, 'accent')));
+  }
+
+  function scene() {
+    const w = plan.warmup;
+    host.append(el('div', {
+      class: 'card',
+      style: `font-size:clamp(18px,2.4vw,28px);line-height:2;text-align:start;max-height:${shown ? '34vh' : '58vh'};overflow:auto`
+    }, rtl(w.text || '')));
+
+    if (shown && w.openQuestion) host.append(el('div', {
+      class: 'card', style: 'background:color-mix(in srgb,var(--warm) 15%,transparent)'
+    },
+      el('b', { style: 'color:var(--warm);font-size:15px' }, '؟  السؤال'),
+      el('div', { style: 'font-size:clamp(20px,2.8vw,32px);font-weight:600;line-height:1.8;margin-top:8px' }, rtl(w.openQuestion)),
+      el('div', { class: 'muted', style: 'margin-top:8px;font-size:15px' },
+        rtl('لا تُجبْ عنه الآن — جوابُه في الدرس.'))));
+
+    host.append(el('div', { class: 'row', style: 'justify-content:center;margin-top:12px' },
+      !shown ? btn('اطرحِ السؤالَ', () => { shown = true; paint(); })
+             : btn('إلى الدرس', () => { stage = 'report'; paint(); }, 'accent')));
   }
 
   function tally() {
