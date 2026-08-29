@@ -198,7 +198,10 @@ export function traceScreen(w, autoChar) {
       clear(chips);
       for (let i = 0; i < nStep; i++) {
         const done = results[i] != null;
-        const label = i < nStroke ? `خُطْوَة ${ar(i + 1)}` : 'نُقْطَة';
+        // الحرفُ بنَفَسٍ واحدٍ، ولا يُقسَّمُ إلّا حيث يُرفَعُ القلمُ حقًّا
+        const label = i < nStroke
+          ? (nStroke === 1 ? 'الحَرْفُ كُلُّهُ' : `سَكْتَة ${ar(i + 1)}`)
+          : 'نُقْطَة';
         chips.append(el('span', {
           style: 'padding:4px 10px;border-radius:999px;font-size:12px;'
             + (i === step ? 'font-weight:700;background:rgba(42,140,184,.18);color:var(--brand)'
