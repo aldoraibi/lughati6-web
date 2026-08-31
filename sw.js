@@ -1,6 +1,6 @@
 // عملٌ بلا إنترنت بعد أوّل فتح
 // تُرفَع هذه مع كلِّ تحديثٍ، وإلّا بقي الطالبُ على النسخةِ القديمةِ المخزَّنة
-const V = 'lughati6-v7';
+const V = 'lughati6-v8';
 self.addEventListener('install', e => { self.skipWaiting(); });
 self.addEventListener('activate', e => e.waitUntil(
   caches.keys()
