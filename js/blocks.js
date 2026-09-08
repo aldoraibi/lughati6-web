@@ -1,4 +1,4 @@
-import { el, rtl, ar } from './ui.js';
+import { el, rtl, bt, ar } from './ui.js';
 
 /** كتلة محتوى قرائي — تقابل ContentBlockView في تطبيق iPad */
 export function block(b, memoBadge) {
@@ -7,7 +7,7 @@ export function block(b, memoBadge) {
 
   switch (b.kind) {
     case 'heading':
-      wrap.append(el('p', { class: 'blk heading' }, rtl(b.text))); break;
+      wrap.append(el('p', { class: 'blk heading' }, bt(b.text))); break;
     case 'note':
       wrap.append(el('div', { class: 'blk note' }, ...lines(b.text))); break;
     case 'rule':
@@ -15,14 +15,14 @@ export function block(b, memoBadge) {
     case 'example':
       wrap.append(el('div', { class: 'blk note' }, ...lines(b.text))); break;
     case 'list':
-      wrap.append(el('ul', { class: 'blk' }, ...(b.items || []).map(i => el('li', {}, rtl(i))))); break;
+      wrap.append(el('ul', { class: 'blk' }, ...(b.items || []).map(i => el('li', {}, bt(i))))); break;
     case 'poem':
       (b.verses || []).forEach(v => wrap.append(
-        el('div', { class: 'verse' }, ...v.map(h => el('span', {}, rtl(h))))));
+        el('div', { class: 'verse' }, ...v.map(h => el('span', {}, bt(h))))));
       break;
     case 'table': {
       const t = el('table', { class: 't' });
-      (b.rows || []).forEach(r => t.append(el('tr', {}, ...r.map(c => el('td', {}, rtl(c))))));
+      (b.rows || []).forEach(r => t.append(el('tr', {}, ...r.map(c => el('td', {}, bt(c))))));
       wrap.append(el('div', { class: 'blk', style: 'overflow-x:auto' }, t));
       break;
     }
@@ -38,11 +38,11 @@ export function block(b, memoBadge) {
       wrap.append(el('p', { class: 'blk' }, ...lines(b.text)));
   }
   if (b.caption && b.kind !== 'media')
-    wrap.append(el('div', { class: 'muted', style: 'font-size:13.5px;margin-top:-6px' }, rtl(b.caption)));
+    wrap.append(el('div', { class: 'muted', style: 'font-size:13.5px;margin-top:-6px' }, bt(b.caption)));
   return wrap;
 }
 
-const lines = t => (t || '').split('\n').flatMap((l, i) => i ? [el('br'), rtl(l)] : [rtl(l)]);
+const lines = t => (t || '').split('\n').flatMap((l, i) => i ? [el('br'), bt(l)] : [bt(l)]);
 
 /** مشغّل الاستماع: صوتٌ فقط، وشاشة إصغاء تُخفي الصفحة */
 function listenCard(b) {

@@ -124,3 +124,9 @@ table.t tr:first-child{background:color-mix(in srgb,var(--primary) 12%,transpare
 .g2{grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}
 .g3{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}
 .center{text-align:center}
+
+/* علاماتُ ألوانِ الكتاب — تقابل bookText في التطبيق */
+.bk b.bk-r { color: #c8102e; }
+.bk b.bk-b { color: #1f5fbf; }
+.bk b.bk-g { color: #218c3d; }
+.bk b.bk-y { background: rgba(255, 220, 0, .55); border-radius: 3px; padding: 0 2px; }

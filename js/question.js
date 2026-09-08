@@ -1,4 +1,4 @@
-import { el, rtl, ar, bold, fill } from './ui.js';
+import { bt, strip, el, rtl, ar, bold, fill } from './ui.js';
 import { grade } from './answer.js';
 import { C, S, skillTitle } from './store.js';
 import { handwritingPad } from './handwriting.js';
@@ -16,11 +16,11 @@ export function questionCard(q, i, lessonID) {
   const draw = () => {
     fill(body, );
 
-    if (q.context) body.append(el('div', { class: 'muted', style: 'font-size:15px;margin-bottom:6px' }, rtl(q.context)));
+    if (q.context) body.append(el('div', { class: 'muted', style: 'font-size:15px;margin-bottom:6px' }, bt(q.context)));
 
     body.append(el('div', { class: 'qhead' },
       el('div', { class: 'qnum' }, q.number ? rtl(q.number) : ar(i + 1)),
-      el('p', { class: 'qtext' }, rtl(q.prompt))));
+      el('p', { class: 'qtext' }, bt(q.prompt))));
 
     if (q.image) body.append(el('div', { class: 'blk', style: 'margin-top:10px' },
       el('img', { src: `content/images/${q.image}.jpg`, alt: '', loading: 'lazy',
@@ -64,7 +64,7 @@ export function questionCard(q, i, lessonID) {
         el('b', {}, ok === null ? 'قارِنْ إجابتك بالنموذجية' : ok ? '✅ إجابةٌ صحيحة' : '↻ راجِعْ إجابتك'),
         q.explanation ? el('div', { style: 'margin-top:6px' }, rtl(q.explanation)) : null,
         q.modelAnswer ? el('div', { style: 'margin-top:8px' },
-          el('b', {}, 'الإجابة النموذجية: '), rtl(q.modelAnswer)) : null,
+          el('b', {}, 'الإجابة النموذجية: '), bt(q.modelAnswer)) : null,
         el('div', { style: 'margin-top:10px' },
           el('button', { class: 'btn sm ghost', onclick: () => {
             checked = false; a = { k: a.k, m: a.m, p: a.p }; save();
@@ -121,7 +121,7 @@ export function questionCard(q, i, lessonID) {
         const sel = el('select', { class: 'txt', style: 'max-width:230px', disabled: checked,
           onchange: e => { a.pairs[e.target.value] = ri; save(); } },
           el('option', { value: '' }, '—'),
-          ...(q.leftItems || []).map((l, li) => el('option', { value: li, selected: a.pairs[li] === ri }, l)));
+          ...(q.leftItems || []).map((l, li) => el('option', { value: li, selected: a.pairs[li] === ri }, strip(l))));
         wrap.append(el('div', { class: 'row', style: 'margin-top:8px' },
           el('span', { style: 'flex:1' }, rtl(r)), sel));
       });

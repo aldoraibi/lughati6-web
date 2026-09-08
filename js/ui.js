@@ -18,6 +18,27 @@ export const ar = n => String(n).replace(/\d/g, d => AR[+d]);
 /** علامة RLM: تمنع انقلاب السطر إذا بدأ برقم أو قوس */
 export const rtl = s => '‏' + (s ?? '');
 
+/** علاماتُ ألوانِ الكتاب — اللونُ جزءٌ من السؤال لا زينة:
+ *  ⟪أحمر⟫ ⟨أزرق⟩ ⟦أخضر⟧ ⟬تظليل أصفر⟭ — تقابل bookText في تطبيق iPad */
+const MARKS = [['⟪', '⟫', 'bk-r'], ['⟨', '⟩', 'bk-b'], ['⟦', '⟧', 'bk-g'], ['⟬', '⟭', 'bk-y']];
+export const bt = s => {
+  let rest = s ?? '';
+  const out = el('span', { class: 'bk' }, '‏');
+  for (;;) {
+    let best = null;
+    for (const [o, c, cls] of MARKS) {
+      const i = rest.indexOf(o);
+      if (i >= 0 && (best === null || i < best.i)) best = { i, c, cls };
+    }
+    const j = best ? rest.indexOf(best.c, best.i + 1) : -1;
+    if (!best || j < 0) { out.append(rest); return out; }
+    out.append(rest.slice(0, best.i), el('b', { class: best.cls }, rest.slice(best.i + 1, j)));
+    rest = rest.slice(j + 1);
+  }
+};
+/** النصُّ بلا علاماتِ اللون — لِما يُقارَنُ أو يُنطَق */
+export const strip = s => (s ?? '').replace(/[⟪⟫⟨⟩⟦⟧⟬⟭]/g, '');
+
 /** يحوّل **نص** إلى عريض */
 export const bold = s => rtl(s ?? '').replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
 
