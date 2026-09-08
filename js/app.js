@@ -3,6 +3,7 @@ import { C, S, loadContent, lesson, allRefs, lessonRef, Profiles } from './store
 import { block } from './blocks.js';
 import { questionCard } from './question.js';
 import { teachMode } from './teach.js';
+import { buildingScreen } from './building.js';
 import { traceScreen } from './trace.js';
 import { glossaryView, memorizeView, foundationsView, aboutView } from './extras.js';
 import { toggleTimer, timerVisible } from './timer.js';
@@ -55,7 +56,7 @@ function topbar(side, scrim) {
 
 const title = () => ({
   home: 'لغتي الجميلة', glossary: 'معجمي اللغوي', memorize: 'نصوص الاستظهار',
-  about: 'بيانات الكتاب والحقوق', foundations: 'أصل الكلام', trace: 'أتدرّب على الخط'
+  about: 'بيانات الكتاب والحقوق', foundations: 'أصل الكلام', trace: 'أتدرّب على الخط', building: 'كيف تُبنى اللغة'
 }[route.name] || lessonRef(route.id)?.title || 'لغتي الجميلة');
 
 // ===== القائمة الجانبية =====
@@ -90,6 +91,7 @@ function buildSide(side) {
   side.append(el('button', { class: 'navitem', onclick: openBoard }, 'السبّورةُ البيضاء'));
 
   side.append(el('div', { class: 'navsec' }, '✦  قبل أن تبدأ'));
+  side.append(item('▶  كيف تُبنى اللغة — شرحٌ متحرّك', { name: 'building' }));
   side.append(item('أصل الكلام — خرائط ذهنية', { name: 'foundations' }));
 
   let comp = '';
@@ -111,6 +113,7 @@ function buildMain(main) {
   else if (R.name === 'foundations') foundationsView(w, go);
   else if (R.name === 'about') aboutView(w);
   else if (R.name === 'trace') traceScreen(w, R.char);
+  else if (R.name === 'building') buildingScreen(w);
   else if (R.name === 'lesson') lessonView(w, R.id);
 }
 
