@@ -82,7 +82,8 @@ export function buildingScreen(w) {
       body.replaceChildren(c.body());
       body.classList.remove('in'); void body.offsetWidth; body.classList.add('in');
       // كلُّ عنصرٍ مخفيٌّ أوّلًا ثمّ يُكشَفُ في الإطارِ التالي فتظهرُ حركتُه
-      requestAnimationFrame(() => requestAnimationFrame(reveal));
+      // مهلةٌ زمنيّةٌ لا إطارُ رسمٍ: إطارُ الرسمِ لا يُطلَقُ في تبويبٍ مخفيٍّ فيبقى كلُّ شيءٍ مخفيًّا
+      setTimeout(reveal, 40);
     } else reveal();
   }
   draw(true);
