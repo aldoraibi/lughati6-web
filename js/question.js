@@ -34,12 +34,12 @@ export function questionCard(q, i, lessonID) {
       class: 'btn sm warm', onclick: () => { a.k = Math.min((a.k || 0) + 1, q.keys.length); save(); draw(); }
     }, a.k ? `مفتاحٌ آخر (${ar(a.k)}/${ar(q.keys.length)})` : '🔑 مفاتيح السؤال'));
     if (q.method) help.append(el('button', {
-      class: 'btn sm ghost', onclick: () => { a.m = !a.m; save(); draw(); }
+      class: 'btn sm sky', onclick: () => { a.m = !a.m; save(); draw(); }
     }, a.m ? 'إخفاء طريقة الحل' : '💡 كيف أحلّ السؤال؟'));
 
     const pl = priorLink(q);
     if (pl) help.append(el('button', {
-      class: 'btn sm ghost', onclick: () => { a.p = !a.p; save(); draw(); }
+      class: 'btn sm lilac', onclick: () => { a.p = !a.p; save(); draw(); }
     }, a.p ? 'إخفاء الربط بما سبق' : '↩︎ أين درستُ هذا من قبل؟'));
     body.append(help);
 
@@ -60,7 +60,8 @@ export function questionCard(q, i, lessonID) {
       }, '✓ تحقّقْ من إجابتي'));
     } else {
       const ok = grade(q, a);
-      body.append(el('div', { class: 'box ' + (ok === null ? 'model' : ok ? 'model' : 'key') },
+      card.classList.toggle('ok', ok === true); card.classList.toggle('bad', ok === false);
+      body.append(el('div', { class: 'box ' + (ok === null ? 'method' : ok ? 'model' : 'bad') },
         el('b', {}, ok === null ? 'قارِنْ إجابتك بالنموذجية' : ok ? '✅ إجابةٌ صحيحة' : '↻ راجِعْ إجابتك'),
         q.explanation ? el('div', { style: 'margin-top:6px' }, rtl(q.explanation)) : null,
         q.modelAnswer ? el('div', { style: 'margin-top:8px' },
@@ -80,6 +81,7 @@ export function questionCard(q, i, lessonID) {
     done[lessonID] = done[lessonID] || {};
     done[lessonID][q.id] = ok;
     S.set('done', done);
+    const at = S.get('doneAt', {}); at[lessonID] = Date.now(); S.set('doneAt', at);
   }
 
   function input() {

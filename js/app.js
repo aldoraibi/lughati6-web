@@ -40,7 +40,7 @@ function render() {
   const main = el('main', { class: 'main' });
   buildSide(side);
   buildMain(main);
-  const scrim = el('div', { class: 'scrim', style: 'display:none', onclick: () => side.classList.remove('open') });
+  const scrim = el('div', { class: 'scrim', style: 'display:none', onclick: () => { side.classList.remove('open'); scrim.style.display = 'none'; } });
   fill(app, el('div', { class: 'shell' }, main, side, scrim));
   main.prepend(topbar(side, scrim));
   // طولُ المستندِ تغيّر، وطبقةُ الحبرِ مقيسةٌ عليه
@@ -48,10 +48,23 @@ function render() {
 }
 
 function topbar(side, scrim) {
+  const me = Profiles.active();
+  const tab = (label, icon, r, on) => el('button', { class: on ? 'on' : '', onclick: () => go(r) }, icon, el('span', {}, label));
+  const isLesson = route.name === 'lesson';
   return el('header', { class: 'topbar' },
-    el('button', { class: 'btn ghost sm burger', onclick: () => side.classList.toggle('open') }, '☰'),
-    el('h1', {}, title()),
-    el('span', { style: 'width:44px' }));
+    el('div', { class: 'who' },
+      el('div', { class: 'av' }, me.emoji),
+      el('div', {}, el('b', {}, me.name), me.note ? el('small', {}, me.note) : null)),
+    el('div', { class: 'pill glass' },
+      tab('الرئيسة', '⌂', { name: 'home' }, route.name === 'home'),
+      tab('الخط', '✎', { name: 'trace' }, route.name === 'trace'),
+      tab('الاستظهار', '▤', { name: 'memorize' }, route.name === 'memorize'),
+      tab('المعجم', '≡', { name: 'glossary' }, route.name === 'glossary'),
+      el('button', { class: isLesson ? 'on' : '', onclick: () => { side.classList.add('open'); scrim.style.display = ''; } }, '☰', el('span', {}, 'الدروس'))),
+    el('div', { class: 'row', style: 'gap:8px;flex-wrap:nowrap' },
+      el('button', { class: 'rbtn glass', title: 'الساعة', onclick: () => { toggleTimer(); render(); } }, '⏱'),
+      el('button', { class: 'rbtn glass', title: 'القلم فوق الصفحة', onclick: () => { toggleInk(); render(); } }, '✒︎'),
+      el('button', { class: 'rbtn glass', title: 'المزيد', onclick: () => { side.classList.add('open'); scrim.style.display = ''; } }, '⋯')));
 }
 
 const title = () => ({
@@ -117,39 +130,84 @@ function buildMain(main) {
   else if (R.name === 'lesson') lessonView(w, R.id);
 }
 
-// ===== الرئيسة =====
+// ===== الرئيسة — الحديقة =====
+const TINT = {
+  'c-istima3': 'sun', 'c-tawasul-shafahi': 'sun', 'c-fahm': 'sky', 'c-istratijiya': 'sky', 'c-tahyiaa': 'sky',
+  'c-imla': 'mint', 'c-nahw': 'mint', 'c-sinf': 'mint', 'c-rasm': 'peach', 'c-tawasul-kitabi': 'peach', 'c-binyat-nass': 'peach',
+  'c-shi3ri': 'lilac', 'c-madkhal': 'lilac', 'c-ikhtibar': 'rose', 'c-mashroo3': 'rose',
+};
+const ICON = { sparkles: '✦', 'door.left.hand.open': '▯', hammer: '⚒', ear: '👂', 'book.pages': '📖', magnifyingglass: '🔍',
+  'pencil.line': '✎', 'text.book.closed': '📘', 'textformat.abc': 'أبج', signature: '✍', 'quote.opening': '❝',
+  'square.stack.3d.up': '▤', 'square.and.pencil': '✎', 'bubble.left.and.bubble.right': '💬', 'checkmark.seal': '✓' };
+
 function homeView(w) {
   const me = Profiles.active();
   const refs = allRefs();
-  const next = me.last ? lessonRef(me.last) : refs[0];
+  const next = (me.last && lessonRef(me.last)) || refs[0];
   const done = S.get('done', {});
-  const answered = Object.values(done).reduce((n, o) => n + Object.keys(o).length, 0);
-  const right = Object.values(done).reduce((n, o) => n + Object.values(o).filter(Boolean).length, 0);
+  const doneIDs = Object.keys(done).filter(id => Object.keys(done[id]).length);
+  const unit = C.cur?.units?.[0];
 
-  w.append(el('div', { class: 'card center' },
-    el('div', { style: 'font-size:40px' }, '📚'),
-    el('h2', {}, 'لغتي الجميلة'),
-    el('div', { class: 'muted' }, rtl('الوحدة الأولى: قدوات ومثل عليا')),
-    el('div', { class: 'muted', style: 'font-size:14px' }, rtl('الصف السادس الابتدائي — الفصل الدراسي الأول'))));
+  w.append(el('h2', { style: 'font-size:28px;margin:6px 0 0' }, `أهلًا ${me.name}!`),
+    el('div', { class: 'muted', style: 'margin-bottom:16px' }, rtl(`الوحدة ${ar(unit?.number || 1)} · ${unit?.title || ''} · ${C.cur?.term || ''}`)));
 
-  if (next) w.append(el('div', { class: 'card' },
-    el('div', { class: 'muted', style: 'font-size:13px' }, me.last ? 'تابعْ من حيث توقّفت' : 'ابدأ الدرس الأول'),
-    el('div', { class: 'row', style: 'justify-content:space-between;margin-top:4px' },
-      el('h3', { style: 'margin:0' }, next.title),
-      el('button', { class: 'btn', onclick: () => go({ name: 'lesson', id: next.id }) }, '▶  افتحْ'))));
+  const hero = el('div', { class: 'hero', onclick: () => next && go({ name: 'lesson', id: next.id }) },
+    el('div', { style: 'position:relative' },
+      el('div', { style: 'font-size:14px;opacity:.85;font-weight:600' }, me.last ? 'تابع من حيث توقفت' : 'الدرس التالي'),
+      el('h2', {}, next?.title || 'ابدأ من أوّل الوحدة')),
+    el('div', { class: 'row', style: 'position:relative;gap:12px' },
+      el('span', { class: 'go' }, '▶  هيّا نبدأ'),
+      next ? el('span', { style: 'font-size:14px;opacity:.9' }, `ص ${next.bookPages.map(ar).join(' – ')}`) : null));
 
-  w.append(el('div', { class: 'card' },
-    el('h3', {}, 'تقدُّمي'),
-    el('div', { class: 'row', style: 'gap:26px' },
-      stat(ar(refs.length), 'درسًا متاحًا'),
-      stat(ar(answered), 'سؤالًا أجبتَ عنه'),
-      stat(answered ? ar(Math.round(right / answered * 100)) + '٪' : '—', 'نسبة الصواب')),
-    el('div', { style: 'margin-top:12px' },
-      el('button', { class: 'btn sm ghost', onclick: () => transferSheet(modal, closeModal, render) },
-        '📱  أُكمِلُ على جهازٍ آخر'))));
+  const pct = refs.length ? doneIDs.length / refs.length : 0;
+  const week = weekDays(done);
+  const tree = el('div', { class: 'card glass', style: 'margin:0' },
+    el('h3', {}, 'شجرتي تنمو'),
+    el('div', { class: 'tree' },
+      treeSVG(pct),
+      el('div', { style: 'flex:1' },
+        el('div', { class: 'muted', style: 'font-size:14px' }, 'كل درس تُتقنه تكبر شجرتك. أنجزت ', el('b', { style: 'color:var(--ink)' }, `${ar(doneIDs.length)} من ${ar(refs.length)}`), ' درسًا.'),
+        el('div', { class: 'bar', style: 'margin-top:8px' }, el('i', { style: `width:${Math.round(pct * 100)}%` })),
+        el('div', { class: 'dots' }, ...Array.from({ length: 7 }, (_, i) => el('i', { class: i < week ? 'on' : '' })),
+          el('span', { class: 'muted', style: 'font-size:12px;margin-inline-start:6px' }, `${ar(week)} أيام هذا الأسبوع`)))));
+  w.append(el('div', { class: 'home-top' }, hero, tree));
+
+  w.append(el('div', { class: 'sec' }, el('h3', {}, 'مهارات الوحدة'), el('span', { class: 'muted', style: 'font-size:13px' }, 'اختر ما تريد التدرّب عليه')));
+  const tiles = el('div', { class: 'tiles' });
+  (unit?.components || []).forEach(c => {
+    const n = c.lessons.filter(l => doneIDs.includes(l.id)).length;
+    const first = c.lessons.find(l => !doneIDs.includes(l.id)) || c.lessons[0];
+    tiles.append(el('button', { class: `tile t-${TINT[c.id] || 'sky'}`, onclick: () => first && go({ name: 'lesson', id: first.id }) },
+      el('div', { class: 'row', style: 'justify-content:space-between' }, el('span', { class: 'ic' }, ICON[c.icon] || '•'), el('small', {}, `${ar(n)}/${ar(c.lessons.length)}`)),
+      el('b', {}, c.title)));
+  });
+  w.append(tiles);
+
+  w.append(el('div', { class: 'quick' },
+    el('button', { class: 'card glass', style: 'margin:0', onclick: () => go({ name: 'trace' }) },
+      el('span', { class: 'ic t-peach' }, '✍'), el('span', {}, el('b', {}, 'أتدرّب على الخط'), el('div', { class: 'muted', style: 'font-size:13px' }, '٢٨ حرفًا بمسارات القلم'))),
+    el('button', { class: 'card glass', style: 'margin:0', onclick: () => transferSheet(modal, closeModal, render) },
+      el('span', { class: 'ic t-lilac' }, '📱'), el('span', {}, el('b', {}, 'أُكمل على جهاز آخر'), el('div', { class: 'muted', style: 'font-size:13px' }, 'انقل تقدّمك برمز أو رابط')))));
 
   w.append(rightsBar());
   w.append(credit());
+}
+
+function weekDays(done) {
+  const t = S.get('doneAt', {}); const now = Date.now(); const days = new Set();
+  Object.values(t).forEach(ms => { if (now - ms < 7 * 864e5) days.add(new Date(ms).toDateString()); });
+  return Math.min(7, days.size);
+}
+
+function treeSVG(p) {
+  const k = 0.7 + 0.3 * Math.min(1, Math.max(0, p));
+  const c = (cx, cy, r, f) => `<circle cx="${cx}" cy="${cy}" r="${r * k}" fill="${f}"/>`;
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', '0 0 150 150'); svg.setAttribute('width', '120'); svg.setAttribute('height', '120');
+  svg.innerHTML = `<path d="M45 140h60" stroke="#B7E4C7" stroke-width="10" stroke-linecap="round"/>
+    <rect x="71" y="${140 - 70 * k}" width="8" height="${70 * k}" rx="4" fill="#8B5E34"/>
+    ${c(50, 78, 24, '#74C69D')}${c(102, 80, 26, '#74C69D')}${c(75, 58, 34, '#95D5B2')}${c(75, 40, 20, '#B7E4C7')}`;
+  return svg;
 }
 
 const stat = (n, label) => el('div', {},
