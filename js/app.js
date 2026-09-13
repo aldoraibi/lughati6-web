@@ -53,7 +53,7 @@ function topbar(side, scrim) {
   const isLesson = route.name === 'lesson';
   return el('header', { class: 'topbar' },
     el('div', { class: 'who' },
-      el('div', { class: 'av' }, me.emoji),
+      el('div', { class: 'av' }, me.name.slice(0, 1)),
       el('div', {}, el('b', {}, me.name), me.note ? el('small', {}, me.note) : null)),
     el('div', { class: 'pill glass' },
       tab('الرئيسة', '⌂', { name: 'home' }, route.name === 'home'),
@@ -148,8 +148,8 @@ function homeView(w) {
   const doneIDs = Object.keys(done).filter(id => Object.keys(done[id]).length);
   const unit = C.cur?.units?.[0];
 
-  w.append(el('h2', { style: 'font-size:28px;margin:6px 0 0' }, `أهلًا ${me.name}!`),
-    el('div', { class: 'muted', style: 'margin-bottom:16px' }, rtl(`الوحدة ${ar(unit?.number || 1)} · ${unit?.title || ''} · ${C.cur?.term || ''}`)));
+  w.append(el('h2', { style: 'font-size:26px;margin:6px 0 0' }, `أهلًا ${me.name}!`),
+    el('div', { class: 'muted', style: 'margin-bottom:16px' }, 'جاهز لدرس اليوم؟'));
 
   const hero = el('div', { class: 'hero', onclick: () => next && go({ name: 'lesson', id: next.id }) },
     el('div', { style: 'position:relative' },
